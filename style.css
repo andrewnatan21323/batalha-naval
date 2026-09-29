@@ -1,0 +1,1764 @@
+/* ==========================================================================
+   BATALHA NAVAL - ESTILOS E ANIMAÇÕES MODERNAS
+   Paleta: #061826, #0A3D62, #087E8B, #00B4D8, #90E0EF, Branco, Vermelho, Dourado
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. VARIÁVEIS CSS E DESIGN TOKENS
+   -------------------------------------------------------------------------- */
+:root {
+  /* Cores Base Oceânicas */
+  --c-bg-abyss: #061826;
+  --c-bg-card: #0a2540;
+  --c-bg-card-glass: rgba(10, 37, 64, 0.85);
+  --c-marine: #0a3d62;
+  --c-teal: #087e8b;
+  --c-cyan: #00b4d8;
+  --c-ice: #90e0ef;
+  --c-white: #ffffff;
+  --c-text-muted: #94a3b8;
+
+  /* Estados de Combate */
+  --c-water: #0284c7;
+  --c-water-light: #38bdf8;
+  --c-hit: #ef4444;
+  --c-hit-glow: rgba(239, 68, 68, 0.6);
+  --c-sunk: #b91c1c;
+  --c-valid: #10b981;
+  --c-valid-glow: rgba(16, 185, 129, 0.5);
+  --c-invalid: #f43f5e;
+  --c-invalid-glow: rgba(244, 63, 94, 0.5);
+  --c-gold: #fbbf24;
+  --c-gold-glow: rgba(251, 191, 36, 0.5);
+
+  /* Elementos de Tabuleiro */
+  --board-cell-size: 38px;
+  --board-grid-gap: 2px;
+  --border-radius-sm: 6px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 20px;
+  
+  /* Sombras e Brilhos */
+  --shadow-subtle: 0 4px 15px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 10px 30px -5px rgba(2, 12, 27, 0.7);
+  --shadow-glow-cyan: 0 0 20px rgba(0, 180, 216, 0.45);
+  --shadow-glow-hit: 0 0 25px rgba(239, 68, 68, 0.6);
+
+  /* Transições Suaves */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Tema Escuro / Tático Militar */
+body.theme-dark {
+  --c-bg-abyss: #030b12;
+  --c-bg-card: #061522;
+  --c-bg-card-glass: rgba(6, 21, 34, 0.92);
+  --c-marine: #07243a;
+  --c-teal: #055f69;
+  --c-cyan: #0ea5e9;
+  --c-ice: #7dd3fc;
+  --shadow-glow-cyan: 0 0 25px rgba(14, 165, 233, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   2. RESET & BASE
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  background-color: var(--c-bg-abyss);
+  color: var(--c-white);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   3. CENÁRIO OCEÂNICO DE FUNDO & EFEITOS
+   -------------------------------------------------------------------------- */
+.ocean-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 15%, rgba(8, 126, 139, 0.3) 0%, rgba(6, 24, 38, 0.95) 75%),
+              linear-gradient(180deg, #061826 0%, #082842 50%, #04101b 100%);
+}
+
+.sun-glow {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse at center, rgba(0, 180, 216, 0.22) 0%, rgba(8, 126, 139, 0.08) 50%, transparent 70%);
+  filter: blur(50px);
+}
+
+/* Silhueta de Navio no Horizonte */
+.ship-silhouette {
+  position: absolute;
+  bottom: 120px;
+  right: -300px;
+  width: 240px;
+  height: 50px;
+  background: #030d15;
+  clip-path: polygon(10% 85%, 25% 45%, 45% 45%, 50% 20%, 55% 45%, 75% 45%, 95% 85%, 98% 100%, 0% 100%);
+  opacity: 0.35;
+  animation: sailAcross 75s linear infinite;
+}
+
+@keyframes sailAcross {
+  0% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-120vw) translateY(4px); }
+  100% { transform: translateX(-240vw) translateY(0); }
+}
+
+/* Efeito Sutil de Radar Circular no Fundo */
+.radar-scan {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(85vw, 850px);
+  height: min(85vw, 850px);
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 180, 216, 0.08);
+  pointer-events: none;
+}
+
+.radar-scan::before {
+  content: '';
+  position: absolute;
+  inset: 15%;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 180, 216, 0.05);
+}
+
+.radar-scan::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg at 50% 50%, rgba(0, 180, 216, 0.12) 0deg, transparent 60deg, transparent 360deg);
+  animation: radarSpin 12s linear infinite;
+}
+
+@keyframes radarSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Bolhas Subaquáticas */
+.bubbles-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  bottom: -30px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), rgba(144, 224, 239, 0.15));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: bubbleFloat linear infinite;
+  box-shadow: 0 0 10px rgba(0, 180, 216, 0.2);
+}
+
+@keyframes bubbleFloat {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.6;
+  }
+  85% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-105vh) translateX(35px) scale(1.15);
+    opacity: 0;
+  }
+}
+
+/* Ondas Oceânicas Animadas */
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 130px;
+  background-repeat: repeat-x;
+  background-size: 50% 100%;
+  transform: translate3d(0, 0, 0);
+}
+
+.wave-1 {
+  background-image: radial-gradient(ellipse at 50% 100%, rgba(8, 126, 139, 0.35) 0%, transparent 70%);
+  opacity: 0.45;
+  animation: waveMotion 18s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+}
+
+.wave-2 {
+  bottom: -15px;
+  background-image: radial-gradient(ellipse at 50% 100%, rgba(10, 61, 98, 0.5) 0%, transparent 65%);
+  opacity: 0.6;
+  animation: waveMotion 12s cubic-bezier(0.36, 0.45, 0.63, 0.53) -4s infinite;
+}
+
+.wave-3 {
+  bottom: -25px;
+  background-image: radial-gradient(ellipse at 50% 100%, rgba(6, 24, 38, 0.85) 0%, transparent 60%);
+  opacity: 0.8;
+  animation: waveMotion 15s cubic-bezier(0.36, 0.45, 0.63, 0.53) -8s infinite;
+}
+
+@keyframes waveMotion {
+  0% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-25%) translateY(12px); }
+  100% { transform: translateX(-50%) translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   4. ESTRUTURA DO JOGO E TELAS
+   -------------------------------------------------------------------------- */
+.game-wrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  display: none;
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px 20px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity var(--transition-slow), transform var(--transition-slow);
+}
+
+.screen.active {
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   5. TELA INICIAL (MENU PRINCIPAL)
+   -------------------------------------------------------------------------- */
+#screen-home {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.home-content {
+  max-width: 650px;
+  width: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-badge {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0, 180, 216, 0.25), rgba(10, 61, 98, 0.6));
+  border: 2px solid var(--c-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 35px rgba(0, 180, 216, 0.5), inset 0 0 15px rgba(0, 180, 216, 0.2);
+  animation: logoPulse 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes logoPulse {
+  0% { transform: scale(1); box-shadow: 0 0 25px rgba(0, 180, 216, 0.4); }
+  100% { transform: scale(1.06); box-shadow: 0 0 45px rgba(0, 180, 216, 0.7); }
+}
+
+.compass-icon {
+  font-size: 46px;
+  color: var(--c-ice);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  animation: compassWobble 6s ease-in-out infinite alternate;
+}
+
+@keyframes compassWobble {
+  0% { transform: rotate(-8deg); }
+  100% { transform: rotate(8deg); }
+}
+
+.main-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.title-sub {
+  font-size: 0.85rem;
+  letter-spacing: 6px;
+  color: var(--c-cyan);
+  font-weight: 700;
+}
+
+.title-main {
+  font-size: clamp(2.4rem, 6vw, 3.8rem);
+  font-weight: 900;
+  letter-spacing: 3px;
+  background: linear-gradient(180deg, #ffffff 20%, var(--c-ice) 70%, var(--c-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 10px 30px rgba(0, 180, 216, 0.35);
+}
+
+.main-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--c-ice);
+  font-style: italic;
+  max-width: 520px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  opacity: 0.95;
+}
+
+.menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 380px;
+  margin-top: 15px;
+}
+
+.home-footer-info {
+  margin-top: 25px;
+  font-size: 0.88rem;
+  color: var(--c-text-muted);
+  letter-spacing: 1px;
+}
+
+.home-footer-info b {
+  color: var(--c-cyan);
+}
+
+/* --------------------------------------------------------------------------
+   6. BOTÕES & INTERATIVIDADE
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: var(--border-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+  user-select: none;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:active {
+  transform: translateY(2px) scale(0.98);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--c-cyan) 0%, var(--c-teal) 100%);
+  color: #03121f;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 180, 216, 0.35);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2fd2f5 0%, #0aa4b6 100%);
+  box-shadow: var(--shadow-glow-cyan);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(10, 61, 98, 0.65);
+  backdrop-filter: blur(10px);
+  color: var(--c-white);
+  border: 1px solid rgba(0, 180, 216, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(10, 61, 98, 0.95);
+  border-color: var(--c-cyan);
+  color: var(--c-ice);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 180, 216, 0.25);
+}
+
+.btn-large {
+  padding: 16px 32px;
+  font-size: 1.15rem;
+}
+
+.btn-sm {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  border-radius: var(--border-radius-sm);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-danger-outline {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: var(--c-hit);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.glow-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(60deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%);
+  transform: rotate(25deg);
+  animation: buttonShine 4.5s infinite;
+}
+
+@keyframes buttonShine {
+  0% { transform: translateX(-100%) rotate(25deg); }
+  25%, 100% { transform: translateX(100%) rotate(25deg); }
+}
+
+.btn-icon-round {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 61, 98, 0.7);
+  border: 1px solid rgba(0, 180, 216, 0.3);
+  color: var(--c-ice);
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-icon-round:hover {
+  background: var(--c-cyan);
+  color: #03121f;
+  transform: scale(1.08);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. CABEÇALHOS DE TELA
+   -------------------------------------------------------------------------- */
+.screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0 20px;
+  border-bottom: 1px solid rgba(0, 180, 216, 0.18);
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--c-white);
+  text-shadow: 0 2px 10px rgba(0, 180, 216, 0.3);
+}
+
+.section-hint {
+  font-size: 0.9rem;
+  color: var(--c-ice);
+  opacity: 0.85;
+}
+
+/* --------------------------------------------------------------------------
+   8. TELA DE PREPARAÇÃO DA FROTA (LAYOUT)
+   -------------------------------------------------------------------------- */
+.placement-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  align-items: start;
+}
+
+.dock-panel {
+  background: var(--c-bg-card-glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 180, 216, 0.25);
+  border-radius: var(--border-radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dock-header h3 {
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: var(--c-ice);
+  text-transform: uppercase;
+}
+
+.badge {
+  background: rgba(0, 180, 216, 0.15);
+  color: var(--c-cyan);
+  border: 1px solid var(--c-cyan);
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.dock-tip {
+  font-size: 0.84rem;
+  color: var(--c-text-muted);
+}
+
+/* Lista de Navios no Hangar */
+.ships-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ship-dock-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(8, 126, 139, 0.15);
+  border: 1px solid rgba(0, 180, 216, 0.2);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ship-dock-card:hover {
+  background: rgba(8, 126, 139, 0.35);
+  border-color: var(--c-cyan);
+  transform: translateX(4px);
+}
+
+.ship-dock-card.selected {
+  background: rgba(0, 180, 216, 0.25);
+  border-color: var(--c-cyan);
+  box-shadow: 0 0 15px rgba(0, 180, 216, 0.4);
+}
+
+.ship-dock-card.placed {
+  opacity: 0.65;
+  border-style: dashed;
+}
+
+.ship-dock-card.placed .ship-status-tag {
+  color: var(--c-valid);
+  border-color: var(--c-valid);
+}
+
+.ship-info-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ship-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--c-white);
+}
+
+.ship-cells-preview {
+  display: flex;
+  gap: 3px;
+}
+
+.ship-segment-dot {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, var(--c-cyan), var(--c-teal));
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.ship-status-tag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--c-ice);
+}
+
+.placement-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(0, 180, 216, 0.15);
+  padding-top: 14px;
+}
+
+.orientation-badge {
+  font-size: 0.72rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--c-cyan);
+}
+
+kbd {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   9. TABULEIROS 10x10 (CSS GRID)
+   -------------------------------------------------------------------------- */
+.board-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.board-card {
+  background: var(--c-bg-card-glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 180, 216, 0.28);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.board-card-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 180, 216, 0.15);
+  padding-bottom: 10px;
+}
+
+.board-tag {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--c-ice);
+  text-transform: uppercase;
+}
+
+.board-coordinate-tip {
+  font-size: 0.82rem;
+  color: var(--c-cyan);
+  font-family: monospace;
+}
+
+.grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  align-items: center;
+}
+
+.grid-labels-cols {
+  display: grid;
+  grid-template-columns: 28px repeat(10, var(--board-cell-size));
+  gap: var(--board-grid-gap);
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--c-cyan);
+  margin-bottom: 2px;
+}
+
+.grid-body {
+  display: flex;
+}
+
+.grid-labels-rows {
+  display: grid;
+  grid-template-rows: repeat(10, var(--board-cell-size));
+  gap: var(--board-grid-gap);
+  width: 28px;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--c-cyan);
+  align-items: center;
+}
+
+.grid-board {
+  display: grid;
+  grid-template-columns: repeat(10, var(--board-cell-size));
+  grid-template-rows: repeat(10, var(--board-cell-size));
+  gap: var(--board-grid-gap);
+  background: rgba(3, 14, 24, 0.85);
+  padding: 4px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(0, 180, 216, 0.35);
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.7);
+  position: relative;
+}
+
+/* Células Individuais */
+.cell {
+  width: var(--board-cell-size);
+  height: var(--board-cell-size);
+  background: rgba(10, 37, 64, 0.65);
+  border: 1px solid rgba(8, 126, 139, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), transform 0.1s ease;
+}
+
+.cell:hover {
+  border-color: var(--c-cyan);
+}
+
+/* Estados da Célula na Preparação */
+.cell.preview-valid {
+  background: rgba(16, 185, 129, 0.45) !important;
+  border-color: var(--c-valid) !important;
+  box-shadow: inset 0 0 10px var(--c-valid-glow);
+}
+
+.cell.preview-invalid {
+  background: rgba(244, 63, 94, 0.45) !important;
+  border-color: var(--c-invalid) !important;
+  box-shadow: inset 0 0 10px var(--c-invalid-glow);
+}
+
+.cell.has-ship {
+  background: linear-gradient(135deg, #1b4965 0%, #0c2d48 100%);
+  border-color: var(--c-cyan);
+  box-shadow: inset 0 0 8px rgba(0, 180, 216, 0.4);
+}
+
+.cell.has-ship::after {
+  content: '';
+  width: 50%;
+  height: 50%;
+  background: var(--c-cyan);
+  border-radius: 2px;
+  opacity: 0.85;
+}
+
+/* Legenda da Preparação */
+.placement-legend {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.84rem;
+  color: var(--c-text-muted);
+  margin-top: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.legend-valid { background: var(--c-valid); }
+.legend-invalid { background: var(--c-invalid); }
+.legend-ship { background: #1b4965; border-color: var(--c-cyan); }
+
+/* --------------------------------------------------------------------------
+   10. TELA DE BATALHA & HUD
+   -------------------------------------------------------------------------- */
+#screen-battle {
+  gap: 18px;
+  padding: 16px 20px;
+}
+
+.battle-hud {
+  background: var(--c-bg-card-glass);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 180, 216, 0.28);
+  border-radius: var(--border-radius-lg);
+  padding: 16px 22px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.hud-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.hud-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-anchor {
+  font-size: 1.5rem;
+  color: var(--c-cyan);
+}
+
+.brand-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: var(--c-white);
+  text-transform: uppercase;
+}
+
+/* Indicador de Turno */
+.hud-turn-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(6, 24, 38, 0.7);
+  padding: 8px 18px;
+  border-radius: 30px;
+  border: 1px solid rgba(0, 180, 216, 0.3);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.turn-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c-cyan);
+  box-shadow: 0 0 10px var(--c-cyan);
+  animation: pulseDot 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes pulseDot {
+  0% { transform: scale(0.85); opacity: 0.6; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+
+.turn-label {
+  font-size: 0.85rem;
+  color: var(--c-text-muted);
+  font-weight: 700;
+}
+
+.turn-player {
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: var(--c-cyan);
+}
+
+.hud-turn-indicator.turn-cpu .turn-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b;
+}
+
+.hud-turn-indicator.turn-cpu .turn-player {
+  color: #f59e0b;
+}
+
+.hud-quick-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Banner de Status / IA Pensando */
+.hud-status-banner {
+  background: rgba(3, 15, 25, 0.8);
+  border: 1px solid rgba(0, 180, 216, 0.2);
+  border-radius: var(--border-radius-sm);
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--c-ice);
+  transition: all var(--transition-fast);
+}
+
+.hud-status-banner.thinking {
+  border-color: #f59e0b;
+  color: #fef08a;
+  background: rgba(45, 26, 3, 0.7);
+  animation: pulseBanner 1s infinite alternate;
+}
+
+@keyframes pulseBanner {
+  0% { opacity: 0.85; }
+  100% { opacity: 1; }
+}
+
+/* Grid de Estatísticas */
+.hud-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.stat-card {
+  background: rgba(6, 24, 38, 0.6);
+  border: 1px solid rgba(0, 180, 216, 0.15);
+  border-radius: var(--border-radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--c-text-muted);
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--c-white);
+  font-family: monospace;
+}
+
+.text-hit { color: var(--c-hit); }
+.text-water { color: var(--c-water-light); }
+.text-player { color: var(--c-cyan); }
+.text-enemy { color: #f87171; }
+
+/* --------------------------------------------------------------------------
+   11. ARENA DE BATALHA (DOIS TABULEIROS)
+   -------------------------------------------------------------------------- */
+.battle-arena {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 28px;
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.battle-board-box {
+  background: var(--c-bg-card-glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 180, 216, 0.28);
+  border-radius: var(--border-radius-lg);
+  padding: 18px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 450px;
+  max-width: 530px;
+}
+
+.board-header-tag {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 180, 216, 0.18);
+  padding-bottom: 8px;
+}
+
+.tag-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag-title .flag {
+  font-size: 1.3rem;
+}
+
+.tag-title h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--c-white);
+  text-transform: uppercase;
+}
+
+.fleet-life-bar {
+  display: flex;
+  gap: 4px;
+}
+
+.ship-life-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c-cyan);
+  box-shadow: 0 0 6px var(--c-cyan);
+  transition: all var(--transition-fast);
+}
+
+.ship-life-dot.dead {
+  background: #374151;
+  box-shadow: none;
+  opacity: 0.5;
+}
+
+.board-footer-tag {
+  font-size: 0.8rem;
+  color: var(--c-text-muted);
+  text-align: center;
+}
+
+/* Tabuleiro Alvo (Inimigo) */
+.target-board .cell:not(.cell-attacked):hover {
+  background: rgba(0, 180, 216, 0.28);
+  border-color: var(--c-cyan);
+  box-shadow: 0 0 14px var(--c-cyan);
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+.target-board .cell:not(.cell-attacked):active {
+  transform: scale(0.95);
+}
+
+/* --------------------------------------------------------------------------
+   12. MARCADORES DE ATAQUE (ÁGUA, ACERTO, DESTRUÍDO)
+   -------------------------------------------------------------------------- */
+/* Água (Miss) */
+.cell.cell-water {
+  background: rgba(2, 132, 199, 0.28) !important;
+  border-color: var(--c-water) !important;
+  cursor: not-allowed;
+  animation: splashIn 0.35s ease-out;
+}
+
+.cell.cell-water::before {
+  content: '🌊';
+  font-size: 14px;
+  filter: drop-shadow(0 0 4px var(--c-water-light));
+}
+
+@keyframes splashIn {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Acerto (Hit) */
+.cell.cell-hit {
+  background: rgba(239, 68, 68, 0.45) !important;
+  border-color: var(--c-hit) !important;
+  box-shadow: inset 0 0 12px var(--c-hit-glow), 0 0 10px var(--c-hit);
+  cursor: not-allowed;
+  animation: explosionFlash 0.4s ease-out;
+}
+
+.cell.cell-hit::before {
+  content: '💥';
+  font-size: 16px;
+  filter: drop-shadow(0 0 6px #ffedd5);
+  animation: hitJiggle 0.3s ease-out;
+}
+
+@keyframes explosionFlash {
+  0% { transform: scale(0.3); background-color: #fff !important; }
+  50% { transform: scale(1.3); background-color: var(--c-hit) !important; }
+  100% { transform: scale(1); }
+}
+
+@keyframes hitJiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+/* Navio Destruído (Sunk) */
+.cell.cell-sunk {
+  background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%) !important;
+  border-color: #f87171 !important;
+  box-shadow: inset 0 0 12px rgba(239, 68, 68, 0.8), 0 0 12px rgba(239, 68, 68, 0.5) !important;
+  animation: sunkRumble 0.5s ease;
+}
+
+.cell.cell-sunk::before {
+  content: '🔥';
+  font-size: 16px;
+}
+
+@keyframes sunkRumble {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-3px, 2px); }
+  40% { transform: translate(3px, -2px); }
+  60% { transform: translate(-2px, -2px); }
+  80% { transform: translate(2px, 2px); }
+}
+
+/* Tremor na Arena em caso de navio afundado */
+.shake-screen {
+  animation: arenaShake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes arenaShake {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(4px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+  40%, 60% { transform: translate3d(5px, 0, 0); }
+}
+
+/* --------------------------------------------------------------------------
+   13. RADAR TÁTICO & LOG STRIP
+   -------------------------------------------------------------------------- */
+.battle-log-strip {
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  background: rgba(3, 14, 24, 0.75);
+  border: 1px solid rgba(0, 180, 216, 0.2);
+  border-radius: var(--border-radius-sm);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: var(--c-ice);
+}
+
+.log-indicator {
+  font-weight: 800;
+  color: var(--c-cyan);
+  letter-spacing: 1px;
+}
+
+.log-entry {
+  font-family: monospace;
+  color: #e0f2fe;
+}
+
+/* --------------------------------------------------------------------------
+   14. TOAST FLUTUANTE DE IMPACTO
+   -------------------------------------------------------------------------- */
+.attack-toast {
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.attack-toast.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 32px;
+  border-radius: 40px;
+  background: rgba(6, 24, 38, 0.95);
+  backdrop-filter: blur(16px);
+  border: 2px solid var(--c-cyan);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), var(--shadow-glow-cyan);
+}
+
+.toast-icon {
+  font-size: 2.2rem;
+}
+
+.toast-text {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.toast-water .toast-content {
+  border-color: var(--c-water-light);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(56, 189, 248, 0.6);
+}
+.toast-water .toast-text { color: var(--c-water-light); }
+
+.toast-hit .toast-content {
+  border-color: var(--c-hit);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), var(--shadow-glow-hit);
+}
+.toast-hit .toast-text { color: var(--c-hit); }
+
+.toast-sunk .toast-content {
+  border-color: var(--c-gold);
+  background: rgba(26, 10, 10, 0.95);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 35px var(--c-gold-glow);
+}
+.toast-sunk .toast-text { color: var(--c-gold); }
+
+/* --------------------------------------------------------------------------
+   15. MODAIS (COMO JOGAR, CONFIGURAÇÕES, CRÉDITOS, FIM DE JOGO)
+   -------------------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 9, 15, 0.82);
+  backdrop-filter: blur(10px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-window {
+  background: var(--c-bg-card);
+  border: 1px solid rgba(0, 180, 216, 0.35);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), var(--shadow-glow-cyan);
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(20px) scale(0.96);
+  transition: transform var(--transition-normal);
+}
+
+.modal-overlay.active .modal-window {
+  transform: translateY(0) scale(1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(0, 180, 216, 0.2);
+}
+
+.modal-header h3 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--c-ice);
+  letter-spacing: 1px;
+}
+
+.btn-close-modal {
+  background: transparent;
+  border: none;
+  color: var(--c-text-muted);
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  transition: color var(--transition-fast);
+}
+
+.btn-close-modal:hover {
+  color: var(--c-white);
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-size: 0.95rem;
+  color: #e0f2fe;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0, 180, 216, 0.2);
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(3, 14, 24, 0.4);
+}
+
+/* Conteúdo: Como Jogar */
+.rule-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rule-section h4 {
+  font-size: 1.05rem;
+  color: var(--c-cyan);
+  font-weight: 700;
+}
+
+.rule-fleet-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(0, 180, 216, 0.15);
+}
+
+.rule-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.badge-rule {
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.badge-water { color: var(--c-water-light); }
+.badge-hit { color: var(--c-hit); }
+.badge-sunk { color: var(--c-gold); }
+
+/* Conteúdo: Configurações */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: rgba(6, 24, 38, 0.5);
+  border: 1px solid rgba(0, 180, 216, 0.15);
+  border-radius: var(--border-radius-md);
+  gap: 14px;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setting-info strong {
+  font-size: 0.98rem;
+  color: var(--c-white);
+}
+
+.setting-info small {
+  color: var(--c-text-muted);
+  font-size: 0.82rem;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #334155;
+  transition: 0.3s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--c-cyan);
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.theme-selector, .diff-selector {
+  display: flex;
+  gap: 6px;
+}
+
+.theme-choice-btn, .diff-btn {
+  background: rgba(10, 61, 98, 0.5);
+  border: 1px solid rgba(0, 180, 216, 0.3);
+  color: var(--c-ice);
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.theme-choice-btn.active, .diff-btn.active {
+  background: var(--c-cyan);
+  color: #03121f;
+  border-color: var(--c-cyan);
+  box-shadow: 0 0 10px rgba(0, 180, 216, 0.4);
+}
+
+.diff-explanation {
+  background: rgba(3, 14, 24, 0.7);
+  border: 1px dashed rgba(0, 180, 216, 0.25);
+  padding: 12px 14px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.86rem;
+  color: var(--c-ice);
+}
+
+/* Conteúdo: Créditos */
+.credits-body {
+  text-align: center;
+  align-items: center;
+  gap: 14px;
+}
+
+.credits-badge {
+  font-size: 3.5rem;
+  color: var(--c-cyan);
+  text-shadow: 0 0 20px rgba(0, 180, 216, 0.5);
+}
+
+.credits-version {
+  color: var(--c-cyan);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.credits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.credit-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--border-radius-sm);
+  border-left: 3px solid var(--c-cyan);
+}
+
+.credit-role {
+  color: var(--c-text-muted);
+  font-size: 0.88rem;
+}
+
+.credit-name {
+  color: var(--c-white);
+  font-weight: 700;
+}
+
+.credits-note {
+  font-size: 0.85rem;
+  color: var(--c-text-muted);
+  margin-top: 8px;
+}
+
+/* Modal Fim de Jogo (Vitória / Derrota) */
+.modal-gameover-card {
+  max-width: 520px;
+  text-align: center;
+  padding: 30px;
+  border-radius: var(--border-radius-lg);
+}
+
+.gameover-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.gameover-icon {
+  font-size: 4rem;
+  filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.7));
+  animation: bounceTrophy 1.5s ease infinite alternate;
+}
+
+@keyframes bounceTrophy {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-8px) scale(1.05); }
+}
+
+.gameover-title {
+  font-size: 2.4rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: var(--c-gold);
+  text-shadow: 0 4px 20px var(--c-gold-glow);
+}
+
+.gameover-desc {
+  font-size: 1.1rem;
+  color: var(--c-ice);
+}
+
+/* Variação Derrota */
+.modal-defeat .gameover-icon {
+  filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.7));
+  animation: defeatSway 2.5s ease infinite alternate;
+}
+
+@keyframes defeatSway {
+  0% { transform: rotate(-5deg); }
+  100% { transform: rotate(5deg); }
+}
+
+.modal-defeat .gameover-title {
+  color: var(--c-hit);
+  text-shadow: 0 4px 20px var(--c-hit-glow);
+}
+
+.gameover-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  background: rgba(3, 14, 24, 0.6);
+  border: 1px solid rgba(0, 180, 216, 0.2);
+  border-radius: var(--border-radius-md);
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.go-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.go-stat-label {
+  font-size: 0.75rem;
+  color: var(--c-text-muted);
+  text-transform: uppercase;
+}
+
+.go-stat-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-family: monospace;
+}
+
+.gameover-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   16. RESPONSIVIDADE (MEDIA QUERIES)
+   -------------------------------------------------------------------------- */
+@media (max-width: 980px) {
+  .placement-layout {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+
+  .dock-panel {
+    order: 2;
+  }
+
+  .board-container {
+    order: 1;
+  }
+
+  .battle-arena {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .battle-board-box {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  :root {
+    --board-cell-size: 28px;
+    --board-grid-gap: 1.5px;
+  }
+
+  .screen {
+    padding: 14px 10px;
+  }
+
+  .board-card, .battle-board-box {
+    padding: 12px 8px;
+  }
+
+  .grid-labels-cols {
+    grid-template-columns: 20px repeat(10, var(--board-cell-size));
+    font-size: 0.72rem;
+  }
+
+  .grid-labels-rows {
+    width: 20px;
+    font-size: 0.72rem;
+  }
+
+  .cell {
+    border-radius: 2px;
+  }
+
+  .cell.cell-water::before { font-size: 10px; }
+  .cell.cell-hit::before { font-size: 11px; }
+  .cell.cell-sunk::before { font-size: 11px; }
+
+  .gameover-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hud-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .stat-card {
+    padding: 6px 8px;
+  }
+
+  .stat-value {
+    font-size: 1.05rem;
+  }
+
+  .hud-top-bar {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 360px) {
+  :root {
+    --board-cell-size: 24px;
+    --board-grid-gap: 1px;
+  }
+  
+  .grid-labels-cols, .grid-labels-rows {
+    font-size: 0.65rem;
+  }
+}

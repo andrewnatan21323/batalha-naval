@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Jogo de Batalha Naval moderno, completo e responsivo desenvolvido com HTML5, CSS3 e JavaScript puro.">
+  <title>⚓ Batalha Naval - Domine os Mares</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-normal">
+  <!-- Ocean Background & FX Container -->
+  <div class="ocean-backdrop" aria-hidden="true">
+    <div class="sun-glow"></div>
+    <div class="ship-silhouette"></div>
+    <div class="radar-scan"></div>
+    <div class="bubbles-container" id="bubbles-container"></div>
+    <div class="wave wave-1"></div>
+    <div class="wave wave-2"></div>
+    <div class="wave wave-3"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="game-wrapper" id="game-wrapper">
+
+    <!-- ============================================== -->
+    <!-- 1. TELA INICIAL (MENU PRINCIPAL) -->
+    <!-- ============================================== -->
+    <section class="screen active" id="screen-home" aria-label="Menu Principal">
+      <div class="home-content">
+        <div class="logo-badge">
+          <div class="compass-icon">⚓</div>
+        </div>
+        <h1 class="main-title">
+          <span class="title-sub">OPERAÇÃO NÁUTICA</span>
+          <span class="title-main">BATALHA NAVAL</span>
+        </h1>
+        <p class="main-subtitle">"Prepare sua frota. Ataque o inimigo. Domine os mares."</p>
+
+        <div class="menu-nav">
+          <button type="button" class="btn btn-primary btn-large glow-btn" id="btn-play">
+            <span class="btn-icon">▶</span>
+            <span class="btn-text">JOGAR</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-how-to-play">
+            <span class="btn-icon">📖</span>
+            <span class="btn-text">COMO JOGAR</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-settings">
+            <span class="btn-icon">⚙</span>
+            <span class="btn-text">CONFIGURAÇÕES</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-credits">
+            <span class="btn-icon">🏆</span>
+            <span class="btn-text">CRÉDITOS</span>
+          </button>
+        </div>
+
+        <div class="home-footer-info">
+          <span>Modo Solo vs IA</span> • <span>Dificuldade: <b id="home-diff-display">Normal</b></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 2. TELA DE PREPARAÇÃO DA FROTA -->
+    <!-- ============================================== -->
+    <section class="screen" id="screen-placement" aria-label="Preparação da Frota">
+      <header class="screen-header">
+        <div class="header-left">
+          <button type="button" class="btn-icon-round" id="btn-back-to-home" title="Voltar ao Menu">
+            <span>←</span>
+          </button>
+          <div>
+            <h2 class="section-title">PREPARE SUA FROTA</h2>
+            <p class="section-hint">Posicione todos os 5 navios para liberar o combate.</p>
+          </div>
+        </div>
+        <div class="header-right">
+          <button type="button" class="btn btn-sm btn-outline" id="btn-toggle-audio-placement" title="Alternar Som">
+            <span id="audio-icon-placement">🔊</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="placement-layout">
+        <!-- Dock / Fleet selection -->
+        <aside class="dock-panel">
+          <div class="dock-header">
+            <h3>HANGAR DE NAVIOS</h3>
+            <span class="badge" id="placed-count-badge">0 / 5</span>
+          </div>
+          <p class="dock-tip">Selecione um navio abaixo e clique no tabuleiro para posicionar.</p>
+
+          <div class="ships-dock" id="ships-dock">
+            <!-- Rendered dynamically by script.js -->
+          </div>
+
+          <div class="placement-controls">
+            <button type="button" class="btn btn-secondary btn-block" id="btn-rotate-ship">
+              <span class="btn-icon">🔄</span>
+              <span class="btn-text">GIRAR NAVIO (<kbd>R</kbd>)</span>
+              <span class="orientation-badge" id="current-orientation-badge">HORIZONTAL</span>
+            </button>
+
+            <button type="button" class="btn btn-secondary btn-block" id="btn-randomize-placement">
+              <span class="btn-icon">🎲</span>
+              <span class="btn-text">POSICIONAMENTO AUTOMÁTICO</span>
+            </button>
+
+            <button type="button" class="btn btn-danger-outline btn-block" id="btn-clear-board">
+              <span class="btn-icon">🗑️</span>
+              <span class="btn-text">LIMPAR TABULEIRO</span>
+            </button>
+
+            <button type="button" class="btn btn-primary btn-large btn-block glow-btn" id="btn-start-battle" disabled>
+              <span class="btn-icon">⚔</span>
+              <span class="btn-text">INICIAR BATALHA</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- Placement Board -->
+        <div class="board-container">
+          <div class="board-card">
+            <div class="board-card-header">
+              <span class="board-tag">SEU TERRITÓRIO</span>
+              <span class="board-coordinate-tip" id="placement-coord-tip">Passe o mouse sobre as células</span>
+            </div>
+            
+            <div class="grid-wrapper">
+              <!-- Column labels (A-J) -->
+              <div class="grid-labels-cols">
+                <span class="corner-blank"></span>
+                <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span>
+                <span>F</span><span>G</span><span>H</span><span>I</span><span>J</span>
+              </div>
+              
+              <div class="grid-body">
+                <!-- Row labels (1-10) -->
+                <div class="grid-labels-rows">
+                  <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                  <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                </div>
+                <!-- 10x10 Placement Grid -->
+                <div class="grid-board placement-board" id="placement-board"></div>
+              </div>
+            </div>
+
+            <div class="placement-legend">
+              <div class="legend-item"><span class="legend-color legend-valid"></span> Válido</div>
+              <div class="legend-item"><span class="legend-color legend-invalid"></span> Inválido / Ocupado</div>
+              <div class="legend-item"><span class="legend-color legend-ship"></span> Navio Posicionado</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 3. TELA DE BATALHA -->
+    <!-- ============================================== -->
+    <section class="screen" id="screen-battle" aria-label="Campo de Batalha">
+      <!-- HUD Superior -->
+      <header class="battle-hud">
+        <div class="hud-top-bar">
+          <div class="hud-brand">
+            <span class="brand-anchor">⚓</span>
+            <span class="brand-title">BATALHA NAVAL</span>
+          </div>
+
+          <div class="hud-turn-indicator" id="hud-turn-indicator">
+            <span class="turn-dot"></span>
+            <span class="turn-label">TURNO:</span>
+            <strong class="turn-player" id="hud-turn-name">VOCÊ</strong>
+          </div>
+
+          <div class="hud-quick-actions">
+            <button type="button" class="btn btn-sm btn-secondary" id="btn-toggle-audio-battle" title="Som">
+              <span id="audio-icon-battle">🔊</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary" id="btn-restart-battle" title="Reiniciar Partida">
+              <span>🔄 REINICIAR</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary" id="btn-menu-battle" title="Voltar ao Menu">
+              <span>🏠 MENU</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Banner de status da IA / combate -->
+        <div class="hud-status-banner" id="hud-status-banner">
+          <span class="status-text" id="hud-status-text">Selecione uma coordenada no tabuleiro inimigo para atacar!</span>
+        </div>
+
+        <!-- Estatísticas da batalha -->
+        <div class="hud-stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Ataques</span>
+            <strong class="stat-value" id="stat-attacks">0</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Acertos</span>
+            <strong class="stat-value text-hit" id="stat-hits">0</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Precisão</span>
+            <strong class="stat-value" id="stat-accuracy">0%</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Tempo</span>
+            <strong class="stat-value" id="stat-timer">00:00</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Seus Navios</span>
+            <strong class="stat-value text-player" id="stat-player-fleet">5 / 5</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Navios Inimigos</span>
+            <strong class="stat-value text-enemy" id="stat-enemy-fleet">5 / 5</strong>
+          </div>
+        </div>
+      </header>
+
+      <!-- Painel dos Tabuleiros de Batalha -->
+      <div class="battle-arena">
+        <!-- Tabuleiro do Jogador -->
+        <div class="battle-board-box player-box">
+          <div class="board-header-tag">
+            <div class="tag-title">
+              <span class="flag">🇧🇷</span>
+              <h3>SUA FROTA</h3>
+            </div>
+            <div class="fleet-life-bar" id="player-fleet-status">
+              <!-- Mini status dos 5 navios do jogador -->
+            </div>
+          </div>
+
+          <div class="grid-wrapper">
+            <div class="grid-labels-cols">
+              <span class="corner-blank"></span>
+              <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span>
+              <span>F</span><span>G</span><span>H</span><span>I</span><span>J</span>
+            </div>
+            <div class="grid-body">
+              <div class="grid-labels-rows">
+                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+              </div>
+              <div class="grid-board battle-board" id="player-board"></div>
+            </div>
+          </div>
+          <div class="board-footer-tag">Posições da sua frota e defesas</div>
+        </div>
+
+        <!-- Tabuleiro do Inimigo (Alvo) -->
+        <div class="battle-board-box enemy-box">
+          <div class="board-header-tag">
+            <div class="tag-title">
+              <span class="flag">🤖</span>
+              <h3>FROTA INIMIGA</h3>
+            </div>
+            <div class="fleet-life-bar" id="enemy-fleet-status">
+              <!-- Mini status dos 5 navios do inimigo -->
+            </div>
+          </div>
+
+          <div class="grid-wrapper">
+            <div class="grid-labels-cols">
+              <span class="corner-blank"></span>
+              <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span>
+              <span>F</span><span>G</span><span>H</span><span>I</span><span>J</span>
+            </div>
+            <div class="grid-body">
+              <div class="grid-labels-rows">
+                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+              </div>
+              <div class="grid-board battle-board target-board" id="enemy-board"></div>
+            </div>
+          </div>
+          <div class="board-footer-tag">Clique em uma coordenada não explorada para disparar</div>
+        </div>
+      </div>
+
+      <!-- Registro rápido de eventos / Logs -->
+      <div class="battle-log-strip" id="battle-log-strip">
+        <span class="log-indicator">📡 RADAR TÁTICO:</span>
+        <span class="log-entry" id="battle-log-msg">Sistemas de mira online. Aguardando coordenadas de tiro...</span>
+      </div>
+    </section>
+
+  </div><!-- /game-wrapper -->
+
+  <!-- ============================================== -->
+  <!-- TOAST FLUTUANTE DE IMPACTO (ÁGUA / ACERTO / AFUNDADO) -->
+  <!-- ============================================== -->
+  <div class="attack-toast" id="attack-toast" aria-live="polite">
+    <div class="toast-content" id="toast-content">
+      <span class="toast-icon" id="toast-icon">💥</span>
+      <span class="toast-text" id="toast-text">ACERTO!</span>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: COMO JOGAR -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-how-to-play" role="dialog" aria-modal="true" aria-labelledby="modal-rules-title">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 id="modal-rules-title">📖 COMO JOGAR</h3>
+        <button type="button" class="btn-close-modal" data-close="modal-how-to-play">&times;</button>
+      </div>
+      <div class="modal-body rules-body">
+        <div class="rule-section">
+          <h4>🎯 Objetivo do Jogo</h4>
+          <p>Localize e destrua toda a esquadra naval inimiga de 5 navios antes que a Inteligência Artificial afunde a sua frota.</p>
+        </div>
+
+        <div class="rule-section">
+          <h4>🚢 Composição da Frota</h4>
+          <div class="rule-fleet-list">
+            <div><strong>Porta-aviões:</strong> 5 células</div>
+            <div><strong>Encouraçado:</strong> 4 células</div>
+            <div><strong>Cruzador:</strong> 3 células</div>
+            <div><strong>Submarino:</strong> 3 células</div>
+            <div><strong>Destroyer:</strong> 2 células</div>
+          </div>
+        </div>
+
+        <div class="rule-section">
+          <h4>📐 Posicionamento & Rotação</h4>
+          <p>Na tela de preparação, selecione um navio da lista e clique no tabuleiro. Use o botão <strong>GIRAR NAVIO</strong> ou pressione a tecla <kbd>R</kbd> no teclado para alternar entre Horizontal e Vertical. Navios não podem sair da grade nem se sobrepor.</p>
+          <p>Você também pode usar o botão <strong>POSICIONAMENTO AUTOMÁTICO</strong> para posicionar toda a frota instantaneamente.</p>
+        </div>
+
+        <div class="rule-section">
+          <h4>⚔️ Ataque e Turnos</h4>
+          <p>No seu turno, clique em uma coordenada desconhecida no tabuleiro da <strong>FROTA INIMIGA</strong>:</p>
+          <ul class="rule-bullets">
+            <li><span class="badge-rule badge-water">🌊 ÁGUA:</span> O projétil caiu no mar aberto. O turno passa para o computador.</li>
+            <li><span class="badge-rule badge-hit">💥 ACERTO:</span> Você atingiu uma parte de um navio inimigo!</li>
+            <li><span class="badge-rule badge-sunk">🔥 NAVIO DESTRUÍDO:</span> Todas as casas daquele navio foram atingidas!</li>
+          </ul>
+        </div>
+
+        <div class="rule-section">
+          <h4>🏆 Como Vencer</h4>
+          <p>Afunde todos os 5 navios inimigos (total de 17 acertos) para conquistar a vitória suprema nos mares!</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-close="modal-how-to-play">← VOLTAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: CONFIGURAÇÕES -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-settings" role="dialog" aria-modal="true" aria-labelledby="modal-settings-title">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 id="modal-settings-title">⚙ CONFIGURAÇÕES</h3>
+        <button type="button" class="btn-close-modal" data-close="modal-settings">&times;</button>
+      </div>
+      <div class="modal-body settings-body">
+        <!-- Áudio FX -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <strong>🔊 Efeitos Sonoros</strong>
+            <small>Disparos, explosões, respingos e alertas</small>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="cfg-sound-effects" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- Música / Ambiente -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <strong>🎵 Ambiente Marinho / Trilha</strong>
+            <small>Som suave de ondas e pulsos de sonar</small>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="cfg-ambient-music" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- Tema Visual -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <strong>🎨 Tema Visual</strong>
+            <small>Esquema de cores da interface</small>
+          </div>
+          <div class="theme-selector">
+            <button type="button" class="theme-choice-btn active" data-theme="theme-normal">Normal</button>
+            <button type="button" class="theme-choice-btn" data-theme="theme-dark">Escuro</button>
+          </div>
+        </div>
+
+        <!-- Dificuldade da IA -->
+        <div class="setting-row">
+          <div class="setting-info">
+            <strong>🤖 Dificuldade da IA</strong>
+            <small>Comportamento tático do computador</small>
+          </div>
+          <div class="diff-selector">
+            <button type="button" class="diff-btn" data-diff="easy">Fácil</button>
+            <button type="button" class="diff-btn active" data-diff="normal">Normal</button>
+            <button type="button" class="diff-btn" data-diff="hard">Difícil</button>
+          </div>
+        </div>
+
+        <div class="diff-explanation" id="diff-explanation">
+          <strong>Modo Normal:</strong> A IA dispara aleatoriamente e, ao acertar um navio, passa a explorar as posições vizinhas.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="btn-save-settings">SALVAR CONFIGURAÇÕES</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: CRÉDITOS -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-credits" role="dialog" aria-modal="true" aria-labelledby="modal-credits-title">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 id="modal-credits-title">🏆 CRÉDITOS</h3>
+        <button type="button" class="btn-close-modal" data-close="modal-credits">&times;</button>
+      </div>
+      <div class="modal-body credits-body">
+        <div class="credits-badge">⚓</div>
+        <h4>BATALHA NAVAL MODERNA</h4>
+        <p class="credits-version">Versão 1.0 • Edição Web Profissional</p>
+        
+        <div class="credits-list">
+          <div class="credit-item">
+            <span class="credit-role">Desenvolvimento:</span>
+            <span class="credit-name">Trabalho Web Gustavo</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-role">Tecnologia:</span>
+            <span class="credit-name">HTML5, CSS3, JavaScript Puro (Vanilla JS)</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-role">Áudio & Sintetizador:</span>
+            <span class="credit-name">Web Audio API (Procedural)</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-role">Inteligência Artificial:</span>
+            <span class="credit-name">Algoritmos de Paridade & Caça/Alvo Heurístico</span>
+          </div>
+        </div>
+        <p class="credits-note">100% livre de bibliotecas externas e dependências. Criado para proporcionar a melhor experiência de jogo direto no seu navegador.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-close="modal-credits">← FECHAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: FIM DE JOGO (VITÓRIA / DERROTA) -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-gameover" role="dialog" aria-modal="true" aria-labelledby="gameover-title">
+    <div class="modal-window modal-gameover-card" id="gameover-card">
+      <div class="gameover-header">
+        <div class="gameover-icon" id="gameover-icon">🏆</div>
+        <h2 class="gameover-title" id="gameover-title">VITÓRIA!</h2>
+        <p class="gameover-desc" id="gameover-desc">Você destruiu toda a frota inimiga!</p>
+      </div>
+
+      <div class="gameover-stats">
+        <div class="go-stat">
+          <span class="go-stat-label">Ataques</span>
+          <span class="go-stat-val" id="go-stat-attacks">0</span>
+        </div>
+        <div class="go-stat">
+          <span class="go-stat-label">Acertos</span>
+          <span class="go-stat-val text-hit" id="go-stat-hits">0</span>
+        </div>
+        <div class="go-stat">
+          <span class="go-stat-label">Erros (Água)</span>
+          <span class="go-stat-val text-water" id="go-stat-misses">0</span>
+        </div>
+        <div class="go-stat">
+          <span class="go-stat-label">Precisão</span>
+          <span class="go-stat-val" id="go-stat-accuracy">0%</span>
+        </div>
+        <div class="go-stat">
+          <span class="go-stat-label">Tempo</span>
+          <span class="go-stat-val" id="go-stat-time">00:00</span>
+        </div>
+        <div class="go-stat">
+          <span class="go-stat-label">Navios Restantes</span>
+          <span class="go-stat-val text-player" id="go-stat-ships">0</span>
+        </div>
+      </div>
+
+      <div class="gameover-actions">
+        <button type="button" class="btn btn-primary btn-large glow-btn" id="btn-play-again">
+          <span class="btn-icon">🔄</span>
+          <span class="btn-text">JOGAR NOVAMENTE</span>
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-go-home">
+          <span class="btn-icon">🏠</span>
+          <span class="btn-text">MENU PRINCIPAL</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
